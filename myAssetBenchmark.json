@@ -1,0 +1,38 @@
+{
+    "test": {
+    "name": "simple",
+    "description" : "This is an example benchmark for caliper, to test the backend DLT's performance with simple account opening & querying transactions",
+    "clients": {
+      "type": "local",
+      "number": 15
+    },
+    "rounds": [{
+      "label" : "open",
+      "txNumber" : [10000],
+      "rateControl" : [
+        {
+          "type": "fixed-backlog",
+          "opts": {
+            "unfinished_per_client": 500,
+            "startingTps": 300
+          }
+        }
+      ],
+      "callback" : "callbacks/qury.js"
+    }]
+  },
+  "monitor": {
+    "type": ["docker", "process"],
+    "docker":{
+      "name": ["all"]
+    },
+    "process": [
+      {
+        "command" : "node",
+        "arguments" : "local-client.js",
+        "multiOutput" : "avg"
+      }
+    ],
+    "interval": 1
+  }
+}
