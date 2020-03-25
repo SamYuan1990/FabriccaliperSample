@@ -4,7 +4,7 @@
     "description" : "This is an example benchmark for caliper, to test the backend DLT's performance with simple account opening & querying transactions",
     "clients": {
       "type": "local",
-      "number": 15
+      "number": 5
     },
     "rounds": [{
       "label" : "open",
@@ -13,8 +13,8 @@
         {
           "type": "fixed-backlog",
           "opts": {
-            "unfinished_per_client": 500,
-            "startingTps": 300
+            "unfinished_per_client": 300,
+            "startingTps": 30
           }
         }
       ],
@@ -22,7 +22,7 @@
     }]
   },
   "monitor": {
-    "type": ["docker", "process"],
+    "type": ["docker", "process","prometheus"],
     "docker":{
       "name": ["all"]
     },
@@ -33,6 +33,28 @@
         "multiOutput" : "avg"
       }
     ],
+    "prometheus": {
+      "url":"http://localhost:9090",
+      "push_url":"http://localhost:9091"
+    },
+    "metrics": {
+      "ignore": ["prometheus", "pushGateway", "cadvisor", "grafana", "node-exporter"],
+      "include":{
+        "Endorse Time (s)":{
+          "query":"rate(endorser_propsal_duration_sum{chaincode=\"mycc\"}[5m])/rate(endorser_propsal_duration_count{chaincode=\"mycc\"}[5m])",
+          "step": 1,
+          "label": "instance",
+          "statistic": "avg"
+        },
+        "Max Memory (MB)": {
+          "query":"sum(container_memory_rss{name=~\".+\"}) by (name)",
+          "step": 10,
+          "label": "instance",
+          "statistic": "max",
+          "multiplier": 0.000001
+        }
+      }
+    },
     "interval": 1
   }
 }
